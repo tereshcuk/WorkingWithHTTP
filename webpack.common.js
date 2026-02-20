@@ -1,6 +1,10 @@
 const path = require("path");
+
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+// import path from "path";
+// import HtmlWebPackPlugin from "html-webpack-plugin";
+// import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 module.exports = {
   target: "web",
