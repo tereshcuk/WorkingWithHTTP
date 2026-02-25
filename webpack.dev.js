@@ -5,7 +5,6 @@ const common = require("./webpack.common");
 // import merge from "webpack-merge";
 // import common from "webpack.common";
 
-
 module.exports = merge(common, {
   // Set the mode to development or production
   mode: "development",

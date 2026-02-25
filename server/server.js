@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import * as crypto from "crypto";
-import pino from 'pino';
-import pinoPretty from 'pino-pretty';
+import pino from "pino";
+import pinoPretty from "pino-pretty";
 
 const app = express();
 const logger = pino(pinoPretty());
@@ -14,10 +14,10 @@ app.use(
     type(req) {
       return true;
     },
-  })
+  }),
 );
 app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'application/json');
+  res.setHeader("Content-Type", "application/json");
   next();
 });
 
@@ -49,7 +49,7 @@ app.use(async (request, response) => {
   const { method, id } = request.query;
   switch (method) {
     case "allTickets":
-      logger.info('All tickets has been called');
+      logger.info("All tickets has been called");
       response.send(JSON.stringify(tickets)).end();
       break;
     case "ticketById": {
@@ -131,8 +131,7 @@ const port = process.env.PORT || 7070;
 const bootstrap = async () => {
   try {
     app.listen(port, () =>
-        logger.info(`Server has been started on http://localhost:${port}`)   
-
+      logger.info(`Server has been started on http://localhost:${port}`),
     );
   } catch (error) {
     console.error(`Ошибка: ${error}`);

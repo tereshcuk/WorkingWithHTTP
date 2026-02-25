@@ -3,7 +3,6 @@
  *  Он содержит методы для генерации разметки тикета.
  * */
 
-
 class TicketView {
   constructor(container, ticket) {
     this.container = container;
@@ -24,19 +23,19 @@ class TicketView {
   }
 
   bindEvents() {
-    const deleteBtn = this.element.querySelector('.delete-btn');
-    deleteBtn.addEventListener('click', () => {
+    const deleteBtn = this.element.querySelector(".delete-btn");
+    deleteBtn.addEventListener("click", () => {
       alert(`Удалить тикет "${this.ticket.title}"?`);
     });
 
-    const editBtn = this.element.querySelector('.edit-btn');
-    editBtn.addEventListener('click', () => {
+    const editBtn = this.element.querySelector(".edit-btn");
+    editBtn.addEventListener("click", () => {
       alert(`Редактировать тикет "${this.ticket.title}"`);
     });
   }
 
   render() {
-    this.element = document.createElement('div');
+    this.element = document.createElement("div");
     this.element.innerHTML = this.generateTicketHtml();
     this.container.append(this.element);
     this.bindEvents();
