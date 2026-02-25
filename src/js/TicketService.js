@@ -16,7 +16,8 @@ export default class TicketService {
   }
 
   get(id, callback) {
-    fetch(`${this.addressOfTheServe}/api/tickets?id=${id}`)
+    console.log(`TicketService ID: ${id}`);
+    fetch(`${this.addressOfTheServe}/?method=ticketById&id=${id}`)
       .then(res => res.json())
       .then(data => callback(null, data))
       .catch(err => callback(err));
@@ -36,7 +37,7 @@ export default class TicketService {
   }
 
   update(id, data, callback) {
-    fetch(`${this.addressOfTheServe}/api/tickets?id=${id}`, {
+    fetch(`${this.addressOfTheServe}/?method=updateById&id=${id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -49,8 +50,10 @@ export default class TicketService {
   }
 
   delete(id, callback) {
-    fetch(`${this.addressOfTheServe}/api/tickets?id=${id}`, {
-      method: 'GET', // согласно вашему примеру, удаление делается GET-запросом
+    // console.log(`ID: ${id}`);
+
+    fetch(`${this.addressOfTheServe}/?method=deleteById&id=${id}`, {
+      method: 'GET', 
     })
       .then(() => callback(null, { message: 'Tiket deleted successfully!' }))
       .catch(err => callback(err));
