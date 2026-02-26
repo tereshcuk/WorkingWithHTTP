@@ -49,9 +49,9 @@ export default class TicketService {
 
   delete(id, callback) {
     fetch(`${this.addressOfTheServe}/?method=deleteById&id=${id}`, {
-      method: "GET",
+      method: "DELETE",
     })
-      .then(() => callback(null, { message: "Tiket deleted successfully!" }))
+      .then(() => callback(null))
       .catch((err) => callback(err));
   }
 }

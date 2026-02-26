@@ -1,5 +1,4 @@
 import TicketForm from "./TicketForm";
-import createRequest from "./createRequest";
 
 export default class HelpDesk {
   constructor(rootContainer, ticketService) {
@@ -8,15 +7,14 @@ export default class HelpDesk {
     this.ticketService = ticketService;
     this.tickets = [];
     this.ticketForms = {};
-    this.addressOfTheServe = "http://localhost:7070";
   }
 
   /**
    * Инициализирует приложение
    */
-  init() {
+  async init() {
     // Загружаем начальный список тикетов
-    this.loadTickets();
+    await this.loadTickets();
     // Создаем шаблон интерфейса
     this.renderUI();
   }
@@ -25,27 +23,21 @@ export default class HelpDesk {
    * Загружает список тикетов с сервера
    */
   async loadTickets() {
-    try {
-      const loadTickURL = `${this.addressOfTheServe}/?method=allTickets`;
-      const tickets = await createRequest({
-        method: "GET",
-        url: loadTickURL,
-      });
-      this.tickets = tickets;
-      this.renderTickets();
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+    await this.ticketService.list((err, tickets) => {
+      if (err) {
+        console.error("Failed to load tickets:", err);
+      } else {
+        this.tickets = tickets;
+        this.renderTickets();
+      }
+    });
   }
 
   /**
    * Рендерит карточки тикетов на странице
    */
   renderTickets() {
-    if (this.container) {
-      this.container.innerHTML = "";
-    }
-
+    this.container.innerHTML = "";
     this.tickets.forEach((ticket) => {
       const ticketCard = document.createElement("div");
       ticketCard.id = ticket.id;
@@ -186,56 +178,50 @@ export default class HelpDesk {
     
      */
   async viewDetails(id) {
-    try {
-      const viewDetURL = `${this.addressOfTheServe}/?method=ticketById&id=${id}`;
-      const ticket = await createRequest({
-        method: "GET",
-        url: viewDetURL,
-      });
-
-      const element = document.querySelector(`[descrip-id="${id}"]`);
-      if (element.classList.contains("display-none")) {
-        element.textContent = ticket.description;
-        element.classList.remove("display-none");
+    await this.ticketService.get(id, (err, ticket) => {
+      if (err) {
+        console.error("Failed to retrieve details:", err);
       } else {
-        element.classList.add("display-none");
-        element.textContent = "";
+        // Отображаем описания тикета
+
+        const element = document.querySelector(`[descrip-id="${id}"]`);
+        if (element.classList.contains("display-none")) {
+          element.textContent = ticket.description;
+          element.classList.remove("display-none");
+        } else {
+          element.classList.add("display-none");
+          element.textContent = "";
+        }
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+    });
   }
 
   /**
-   *      * Редактирует тикет  */
+     *      * Редактирует тикет
+     
+     */
   async editTicket(id) {
-    console.log(`editTicket id : ${id}`);
-    const ticketForm = new TicketForm("change", async (editData) => {
-      try {
-        const editTickURL = `${this.addressOfTheServe}/?method=updateById&id=${id}`;
-        const data = await createRequest({
-          method: "POST",
-          url: editTickURL,
-          body: editData,
-        });
-        location.reload(true);
-      } catch (error) {
-        console.error("Error posting data:", error);
+    const ticketForm = new TicketForm("change", (data) => {
+      this.ticketService.update(id, data, (err, updatedTicket) => {
+        if (err) {
+          console.error("Update failed:", err);
+        } else {
+          location.reload(true);
+        }
+      });
+    });
+
+    await this.ticketService.get(id, (err, ticket) => {
+      if (err) {
+        console.error("Failed to retrieve details:", err);
+      } else {
+        document.querySelector("#title_change").value = ticket.name;
+        document.querySelector("#description_change").value =
+          ticket.description;
       }
     });
 
-    try {
-      const TickURL = `${this.addressOfTheServe}/?method=ticketById&id=${id}`;
-      const ticket = await createRequest({
-        method: "GET",
-        url: TickURL,
-      });
-      ticketForm.showForm();
-      document.querySelector("#title_change").value = ticket.name;
-      document.querySelector("#description_change").value = ticket.description;
-    } catch (error) {
-      console.error("Error edit data:", error);
-    }
+    ticketForm.showForm();
   }
 
   /**
@@ -243,18 +229,14 @@ export default class HelpDesk {
     
      */
   async deleteTicket(id) {
-    const ticketForm = new TicketForm("delete", async (delData) => {
-      try {
-        const delURL = `${this.addressOfTheServe}/?method=deleteById&id=${id}`;
-        await createRequest({
-          method: "GET",
-          url: delURL,
-          body: delData,
-        });
-        location.reload(true);
-      } catch (error) {
-        console.error("Error delete data:", error);
-      }
+    const ticketForm = new TicketForm("delete", (data) => {
+      this.ticketService.delete(id, (err) => {
+        if (err) {
+          console.error("Delete failed:", err);
+        } else {
+          location.reload(true);
+        }
+      });
     });
 
     ticketForm.showForm();
@@ -264,43 +246,31 @@ export default class HelpDesk {
    * Создает новый тикет
    */
   async createTicket() {
-    const ticketForm = new TicketForm("add", async (createdTicket) => {
-      try {
-        const createURL = `${this.addressOfTheServe}/?method=createTicket`;
-        await createRequest({
-          method: "POST",
-          url: createURL,
-          body: createdTicket,
-        });
-        location.reload(true);
-      } catch (error) {
-        console.error("Error posting data:", error);
-      }
+    const ticketForm = new TicketForm("add", (data) => {
+      this.ticketService.create(data, (err, createdTicket) => {
+        if (err) {
+          console.error("Create failed:", err);
+        } else {
+          location.reload(true);
+        }
+      });
     });
 
     ticketForm.showForm();
   }
 
-  /**
-   * Устанавливает отметку выполнено на тикет
-   */
-
   async doneTicket(id) {
     const ticket = this.tickets.find((t) => t.id === id);
     if (ticket) {
-      const doneData = { status: !ticket.status };
+      const data = { status: !ticket.status };
 
-      try {
-        const doneURL = `${this.addressOfTheServe}/?method=updateById&id=${id}`;
-        await createRequest({
-          method: "POST",
-          url: doneURL,
-          body: doneData,
-        });
-        location.reload(true);
-      } catch (error) {
-        console.error("Error done data:", error);
-      }
+      this.ticketService.update(id, data, (err, doneTicket) => {
+        if (err) {
+          console.error("Update failed:", err);
+        } else {
+          location.reload(true);
+        }
+      });
     }
   }
 
